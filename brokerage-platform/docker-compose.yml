@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Primary Database (Relational + Timeseries)
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: brokerage_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=brokerage
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - brokerage-net
+    restart: always
+
+  # Cache & Pub/Sub
+  redis:
+    image: redis:alpine
+    container_name: brokerage_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - brokerage-net
+    restart: always
+    command: redis-server --appendonly yes
+
+networks:
+  brokerage-net:
+    driver: bridge
